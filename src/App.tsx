@@ -8,6 +8,7 @@ import { syncProgress, setWebAppUrl } from './services/progressSync';
 import { CURRICULUM } from './data/curriculum';
 import { ProgressNav } from './components/ProgressNav';
 import { NameInput } from './components/NameInput';
+import { TeacherGuide } from './components/TeacherGuide';
 import { Stage1Intro } from './modules/Stage1Intro';
 import { Stage2Sensors } from './modules/Stage2Sensors';
 import { Stage3Wiring } from './modules/Stage3Wiring';
@@ -132,6 +133,8 @@ function App() {
 
       {/* Progress Navigation */}
       <ProgressNav />
+
+      {teacherMode && <TeacherGuide />}
 
       {/* Stage Content */}
       {currentStage === 1 && <Stage1Intro onComplete={() => handleStageComplete(1)} />}
