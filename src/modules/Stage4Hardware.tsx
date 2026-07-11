@@ -3,6 +3,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ALL_COMPONENTS } from '../data/sensors';
+import { Quiz } from '../components/Quiz';
+import { QUIZ_STAGE4_MQTT } from '../data/quizzes';
 
 // ══════════════════════════════════════════════════════
 // Constants
@@ -29,7 +31,7 @@ const PHOTO_MAP: Record<string, string> = {
 
 const NO_PHOTO_KEYS: string[] = [];
 
-const STEP_LABELS = ['사진 맞추기', '보드 확인', '대시보드 생성기', '펌웨어 업로드', 'WiFi & MQTT', 'Manus 가이드'];
+const STEP_LABELS = ['사진 맞추기', '보드 확인', '대시보드 생성기', '펌웨어 업로드', 'WiFi & MQTT', 'Manus 가이드', 'MQTT 웹 페이지'];
 
 const MANUS_PROMPT = `ESP32-S3-MOC 보드에 연결된 센서와 액추에이터를 활용하여 인터랙티브한 웹 대시보드를 만들어주세요. 대시보드는 실시간 센서 데이터 시각화, 액추에이터 제어 기능, 그리고 흥미로운 스토리텔링 요소가 포함되어야 합니다.`;
 
@@ -278,7 +280,18 @@ function PhotoMatching({ onComplete }: { onComplete: () => void }) {
 // Step 1: Board Reference
 // ══════════════════════════════════════════════════════
 
+const BOARD_PARTS = [
+  { name: 'ESP32-S3 칩', emoji: '🧠', desc: '보드의 두뇌예요! 32비트 듀얼코어 프로세서가 240MHz 속도로 우리가 업로드한 코드를 실행해요. WiFi와 블루투스도 이 칩 안에 들어있답니다.' },
+  { name: 'WiFi & 블루투스 안테나', emoji: '📡', desc: '무선 통신을 담당해요! 2.4GHz WiFi로 인터넷에 연결하고, 블루투스 5로 스마트폰과 통신할 수 있어요. ESP32가 다른 기기와 대화하는 창구예요.' },
+  { name: '플래시 메모리 (16MB)', emoji: '💾', desc: '프로그램을 저장하는 공간이에요. 16MB면 꽤 많은 코드를 저장할 수 있어요. USB로 업로드한 코드가 바로 여기에 저장된답니다.' },
+  { name: 'USB-C 포트', emoji: '🔌', desc: '코드 업로드, 시리얼 통신, 전원 공급을 모두 하나로 해결해요! 요즘 스마트폰 충전기와 같은 케이블을 사용해서 편리해요.' },
+  { name: 'GPIO 핀 헤더', emoji: '📌', desc: '센서와 액추에이터를 연결하는 단자예요. 디지털 29개, 아날로그 18개 핀이 있어서 다양한 부품을 연결할 수 있어요. G|V|S 구조로 되어 있어 배선이 쉬워요.' },
+  { name: '전원 회로', emoji: '⚡', desc: '6-12V 전원을 입력받아 5V로 변환해 보드에 공급해요. 전원 보호 회로가 있어서 잘못된 전원이 들어와도 보드를 보호해준답니다.' },
+];
+
 function BoardReference({ onComplete }: { onComplete: () => void }) {
+  const [expandedPart, setExpandedPart] = useState<number | null>(null);
+
   return (
     <div>
       <div className="info-box info-box--blue" style={{ marginBottom: 16 }}>
@@ -313,6 +326,30 @@ function BoardReference({ onComplete }: { onComplete: () => void }) {
             style={{ width: '100%', borderRadius: 'var(--radius-md)', marginTop: 8 }}
           />
         </div>
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <div className="info-box__title" style={{ marginBottom: 8 }}>🔬 각 부품의 역할 알아보기</div>
+        <p style={{ color: 'var(--text-muted)', marginBottom: 12, fontSize: '0.9rem' }}>
+          부품 이름을 클릭하면 설명이 펼쳐져요!
+        </p>
+        {BOARD_PARTS.map((part, i) => (
+          <div key={i} className="card" style={{ marginBottom: 8, padding: '12px 16px' }}>
+            <div
+              onClick={() => setExpandedPart(expandedPart === i ? null : i)}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}
+            >
+              <span style={{ fontSize: '1.3rem' }}>{part.emoji}</span>
+              <strong style={{ flex: 1 }}>{part.name}</strong>
+              <span style={{ color: 'var(--text-muted)' }}>{expandedPart === i ? '▲' : '▼'}</span>
+            </div>
+            {expandedPart === i && (
+              <div style={{ marginTop: 12, paddingLeft: 12, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                {part.desc}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       <div style={{ marginTop: 20, textAlign: 'center' }}>
@@ -1054,6 +1091,113 @@ function ManusPrompt({ onComplete }: { onComplete: () => void }) {
 }
 
 // ══════════════════════════════════════════════════════
+// Step 6: MQTT Web Page Guide
+// ══════════════════════════════════════════════════════
+
+const MQTT_ANALOGIES = [
+  { emoji: '📦', term: 'ESP32', desc: '우체부 — 센서 데이터(온도, 습도 등)를 배달하는 역할이에요.' },
+  { emoji: '🛣️', term: 'WiFi', desc: '도로 — 데이터가 이동하는 무선 도로예요.' },
+  { emoji: '🏣', term: 'MQTT 브로커', desc: '우체국 — 데이터를 받아서 알맞은 곳으로 배달해요.' },
+  { emoji: '🔒', term: 'TCP 1883', desc: '우체부 전용 도로 — ESP32만 사용할 수 있어요.' },
+  { emoji: '🌐', term: 'WebSocket 9001', desc: '일반인 전용 도로 — 브라우저만 사용할 수 있어요.' },
+  { emoji: '📬', term: '토픽 (Topic)', desc: '우편함 주소 — 데이터가 도착할 목적지예요.' },
+  { emoji: '👁️', term: '웹 페이지', desc: '편지를 읽는 사람 — 데이터를 화면에 표시해요.' },
+];
+
+function MqttWebGuide({ onComplete }: { onComplete: () => void }) {
+  const [quizPassed, setQuizPassed] = useState(false);
+
+  function handleQuizComplete(score: number) {
+    if (score === 100) {
+      setQuizPassed(true);
+    }
+  }
+
+  return (
+    <div>
+      <div className="info-box info-box--blue" style={{ marginBottom: 16 }}>
+        <div className="info-box__title">📊 MQTT 센서 웹 페이지 이해하기</div>
+        <p>ESP32가 측정한 센서 데이터가 어떻게 웹 브라우저 화면까지 도달하는지, 비유를 통해 알아봐요!</p>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <div className="info-box__title" style={{ marginBottom: 12 }}>📖 비유로 이해하기</div>
+        {MQTT_ANALOGIES.map((a, i) => (
+          <div key={i} className="card" style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8, padding: '10px 16px' }}>
+            <div style={{ fontSize: '1.5rem' }}>{a.emoji}</div>
+            <div>
+              <strong style={{ color: 'var(--accent-blue)' }}>{a.term}</strong>
+              <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>{a.desc}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="info-box info-box--yellow" style={{ marginBottom: 16 }}>
+        <div className="info-box__title">🏗️ 전체 시스템 구조</div>
+        <pre style={{
+          background: 'var(--bg-card)',
+          padding: 16,
+          borderRadius: 'var(--radius-md)',
+          fontSize: '0.85rem',
+          lineHeight: 1.8,
+          overflowX: 'auto',
+          margin: 0,
+        }}>
+{`ESP32 (센서 데이터 측정)
+  └── WiFi (무선 인터넷)
+        └── MQTT 브로커 (우체국)
+              ├── TCP 1883번  ← ESP32 전용 도로
+              └── WebSocket 9001번  ← 브라우저 전용 도로
+                    └── 웹 페이지 (데이터 표시)`}
+        </pre>
+      </div>
+
+      <div className="info-box info-box--purple" style={{ marginBottom: 16 }}>
+        <div className="info-box__title">🌐 브라우저는 왜 다른 도로를 쓸까?</div>
+        <p style={{ marginBottom: 8 }}>웹 브라우저(Chrome, Safari 등)는 보안 때문에 TCP "비밀 통로"를 사용할 수 없어요.</p>
+        <p style={{ marginBottom: 8 }}>그래서 <strong>WebSocket</strong>이라는 "공공 통로"를 사용해야 해요.</p>
+        <p>TCP 1883번 도로는 ESP32만 쓸 수 있고, 브라우저는 WebSocket 9001번 도로를 써야 한답니다!</p>
+      </div>
+
+      <div className="info-box info-box--green" style={{ marginBottom: 16 }}>
+        <div className="info-box__title">📱 스마트폰에서 접속하기</div>
+        <p style={{ marginBottom: 8 }}>같은 WiFi에 연결된 스마트폰에서도 대시보드를 볼 수 있어요!</p>
+        <p style={{ marginBottom: 8 }}>PC가 웹 서버(포트 18080)와 MQTT 브로커(포트 9001)를 LAN에 공개하기 때문이에요.</p>
+        <p>접속 방법: <code style={{ background: 'var(--bg-card)', padding: '2px 6px', borderRadius: 4 }}>http://[PC IP주소]:18080/파일이름.html</code></p>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 4 }}>예: http://192.168.0.5:18080/dashboard.html</p>
+      </div>
+
+      <div className="info-box info-box--blue" style={{ marginBottom: 16 }}>
+        <div className="info-box__title">📄 웹 페이지 파일 특징</div>
+        <ul style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
+          <li>단일 HTML 파일 하나로 완성</li>
+          <li>웹 서버 없이 <code style={{ background: 'var(--bg-card)', padding: '2px 6px', borderRadius: 4 }}>file://</code> 로 바로 실행 가능</li>
+          <li>외부 라이브러리는 CDN 스크립트 태그로만 불러옴 (npm 불필요)</li>
+        </ul>
+      </div>
+
+      <Quiz
+        questions={QUIZ_STAGE4_MQTT}
+        title="MQTT 이해 확인 퀴즈"
+        onComplete={handleQuizComplete}
+      />
+
+      {quizPassed && (
+        <div className="info-box info-box--green" style={{ marginTop: 16, textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎉</div>
+          <div className="info-box__title">4단계 모두 완료!</div>
+          <p>MQTT 웹 페이지의 원리를 완벽하게 이해했어요! 수고했어요!</p>
+          <button className="btn btn--success btn--lg" onClick={onComplete} style={{ marginTop: 12 }}>
+            5단계로 진행하기 →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
 // Main Component
 // ══════════════════════════════════════════════════════
 
@@ -1074,7 +1218,7 @@ export function Stage4Hardware({ onComplete, teacherMode }: Stage4Props) {
         시뮬레이션을 완료했다면, 이제 실제 ESP32-S3-MOC 키트로 실습해 보세요!
       </p>
 
-      <StepIndicator current={step} total={6} labels={STEP_LABELS} />
+      <StepIndicator current={step} total={7} labels={STEP_LABELS} />
 
       {teacherMode && (
         <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
@@ -1103,7 +1247,8 @@ export function Stage4Hardware({ onComplete, teacherMode }: Stage4Props) {
       {step === 2 && <DashboardGuide onComplete={() => setStep(3)} />}
       {step === 3 && <FlashingSim onComplete={() => setStep(4)} />}
       {step === 4 && <WiFiConnection onComplete={() => setStep(5)} />}
-      {step === 5 && <ManusPrompt onComplete={onComplete} />}
+      {step === 5 && <ManusPrompt onComplete={() => setStep(6)} />}
+      {step === 6 && <MqttWebGuide onComplete={onComplete} />}
     </div>
   );
 }

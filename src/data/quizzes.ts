@@ -439,6 +439,60 @@ export const QUIZ_STAGE5: QuizQuestion[] = [
   },
 ];
 
+// Stage 4 sub-step: MQTT Web Page Guide
+export const QUIZ_STAGE4_MQTT: QuizQuestion[] = [
+  {
+    id: 1,
+    question: 'MQTT 브로커의 역할을 우체국에 비유하면 어떻게 되나요?',
+    options: [
+      '편지를 쓰는 사람',
+      '편지를 받아서 알맞은 주소로 배달하는 곳',
+      '편지를 배달하는 우체부',
+      '편지를 읽는 사람',
+    ],
+    correctIndex: 1,
+    explanation: 'MQTT 브로커는 우체국 같은 역할이에요! ESP32가 보낸 데이터(편지)를 받아서, 알맞은 토픽(우편함 주소)으로 배달해요.',
+  },
+  {
+    id: 2,
+    question: '웹 브라우저(Chrome, Safari 등)가 MQTT 브로커에 연결할 때 사용하는 포트는 몇 번인가요?',
+    options: ['1883번 (TCP)', '9001번 (WebSocket)', '80번 (HTTP)', '443번 (HTTPS)'],
+    correctIndex: 1,
+    explanation: '브라우저는 보안 때문에 TCP를 직접 사용할 수 없어요. 그래서 WebSocket이라는 방식으로 9001번 포트를 사용해야 한답니다!',
+  },
+  {
+    id: 3,
+    question: 'ESP32가 MQTT 브로커에 데이터를 보낼 때 사용하는 포트는 몇 번인가요?',
+    options: ['1883번 (TCP)', '9001번 (WebSocket)', '80번 (HTTP)', '22번 (SSH)'],
+    correctIndex: 0,
+    explanation: 'ESP32는 TCP 1883번 포트를 사용해요. ESP32는 브라우저와 달리 TCP를 직접 사용할 수 있어서 우체부 전용 도로(1883번)를 쓰는 거예요!',
+  },
+  {
+    id: 4,
+    question: '스마트폰으로 ESP32 대시보드를 보려면 어떤 조건이 필요한가요?',
+    options: [
+      '인터넷만 되면 어디서나 가능',
+      '블루투스가 켜져 있어야 함',
+      'ESP32가 연결된 PC와 같은 WiFi 망에 있어야 함',
+      '5G 네트워크가 필요함',
+    ],
+    correctIndex: 2,
+    explanation: '같은 WiFi 망에 있어야 해요! PC가 웹 서버(포트 18080)와 MQTT 브로커(포트 9001)를 LAN에 공개하기 때문에, 같은 WiFi에서 접속할 수 있어요.',
+  },
+  {
+    id: 5,
+    question: 'MQTT 센서 웹 페이지 파일의 특징으로 올바른 것은?',
+    options: [
+      '여러 개의 파일과 폴더로 구성됨',
+      '웹 서버 설치가 필요함',
+      '단일 HTML 파일 하나로 완성되어 file://로 바로 열 수 있음',
+      'npm과 번들러가 필요함',
+    ],
+    correctIndex: 2,
+    explanation: '단일 HTML 파일 하나로 끝나요! 웹 서버 없이 파일을 더블클릭하면 바로 실행됩니다. 외부 라이브러리는 CDN 스크립트 태그로만 불러와요.',
+  },
+];
+
 export function getQuizForStage(stageId: number): QuizQuestion[] {
   switch (stageId) {
     case 1: return QUIZ_STAGE1;
