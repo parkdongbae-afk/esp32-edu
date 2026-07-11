@@ -557,6 +557,23 @@ function FlashingSim({ onComplete }: { onComplete: () => void }) {
             {statusMessage}
           </div>
 
+          {/* Flash warning */}
+          <div style={{
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            background: flashing ? 'rgba(255,107,107,0.18)' : 'rgba(255,107,107,0.08)',
+            border: '1px solid rgba(255,107,107,0.5)',
+            marginBottom: 12,
+            animation: flashing ? 'pulse 1s ease infinite' : 'none',
+          }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--accent-red)' }}>
+              ⚠️ 플래시 중에는 절대로 USB 케이블을 뽑지 마세요!
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
+              보드가 영구적으로 손상될 수 있습니다.
+            </div>
+          </div>
+
           {/* Action button */}
           <div>
             {!done ? (
@@ -932,6 +949,7 @@ function WiFiConnection({ onComplete }: { onComplete: () => void }) {
 
       {/* Device Status panel (mqtt_connected) */}
       {phase === 'mqtt_connected' && (
+        <>
         <div className="card" style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ fontSize: '0.85rem' }}>📊</span>
@@ -954,6 +972,15 @@ function WiFiConnection({ onComplete }: { onComplete: () => void }) {
             ))}
           </div>
         </div>
+
+        {/* Offline troubleshooting tip */}
+        <div className="info-box info-box--yellow" style={{ marginTop: 8 }}>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            💡 <strong>팁:</strong> Device 상태가 "연결 대기 중(offline)"인 경우,
+            대시보드를 종료하고 USB 케이블을 뽑았다가 다시 연결해주세요.
+          </div>
+        </div>
+        </>
       )}
 
       {/* Success + next button */}
