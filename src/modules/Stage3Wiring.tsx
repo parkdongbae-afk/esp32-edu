@@ -282,9 +282,10 @@ function BoardSVG() {
 // ══════════════════════════════════════════════════════
 interface Stage3Props {
   onComplete: () => void;
+  teacherMode?: boolean;
 }
 
-export function Stage3Wiring({ onComplete }: Stage3Props) {
+export function Stage3Wiring({ onComplete, teacherMode }: Stage3Props) {
   const completeWiringMission = useProgressStore((s) => s.completeWiringMission);
 
   const [missionIndex, setMissionIndex] = useState(0);
@@ -466,6 +467,28 @@ export function Stage3Wiring({ onComplete }: Stage3Props) {
         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 20 }}>
           미션 {missionIndex + 1} / {WIRING_MISSIONS.length} — {mission.title}
         </div>
+
+        {teacherMode && (
+          <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+            {WIRING_MISSIONS.map((m, i) => (
+              <button
+                key={m.id}
+                onClick={() => setMissionIndex(i)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 10px',
+                  background: i === missionIndex ? 'var(--accent-blue)' : 'var(--bg-card)',
+                  color: i === missionIndex ? '#fff' : 'var(--text-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                }}
+              >
+                미션 {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Mission description */}
         <div className="info-box info-box--blue" style={{ marginBottom: 16 }}>

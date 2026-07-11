@@ -20,9 +20,15 @@ function setup() {
     .setFontWeight('bold')
     .setBackground('#4a4a5a')
     .setFontColor('#ffffff')
-    .setHorizontalAlignment('center');
+    .setHorizontalAlignment('center')
+    .setFontSize(15);
   sheet.setFrozenRows(1);
-  sheet.autoResizeColumns(1, 9);
+
+  for (var col = 1; col <= 9; col++) {
+    sheet.setColumnWidth(col, 125);
+  }
+
+  sheet.getRange(2, 1, 100, 9).setFontSize(15);
 }
 
 function doPost(e) {
@@ -51,7 +57,8 @@ function doPost(e) {
     stageData.push(data.stages[j] ? '✅' : '');
   }
   sheet.getRange(rowIndex, 3, 1, 6).setValues([stageData]);
-  sheet.getRange(rowIndex, 9).setValue(new Date());
+  sheet.getRange(rowIndex, 9).setValue(new Date()).setNumberFormat('yyyy-MM-dd HH:mm:ss');
+  sheet.getRange(rowIndex, 1, 1, 9).setFontSize(15);
 
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok' }))

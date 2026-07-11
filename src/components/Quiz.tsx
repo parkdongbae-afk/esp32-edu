@@ -84,7 +84,7 @@ export function Quiz({ questions, onComplete, title = '퀴즈', selectCount }: Q
 
   // ── Finished state ──
   if (state === 'finished') {
-    const passed = correctCount === questions.length;
+    const passed = correctCount === quizQuestions.length;
     return (
       <div className="quiz">
         <div className="quiz__result">

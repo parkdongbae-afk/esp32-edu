@@ -15,7 +15,7 @@ Write-Host "[OK] Frontend built to dist/" -ForegroundColor Green
 # Step 2: Build the Go exe
 Write-Host "`n[2/3] Compiling Go + Wails exe..." -ForegroundColor Yellow
 $env:CGO_ENABLED = "0"
-go build -tags "desktop,production" -ldflags "-s -w -H windowsgui" -o esp32-edu.exe .
+go build -tags "desktop,production" -ldflags "-H windowsgui" -o esp32-edu.exe .
 if ($LASTEXITCODE -ne 0) {
     Write-Host "`n[ERROR] Go build failed!" -ForegroundColor Red
     exit 1

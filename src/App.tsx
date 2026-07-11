@@ -25,12 +25,26 @@ function App() {
   const studentName = useStudentStore((s) => s.name);
   const clearStudent = useStudentStore((s) => s.clearStudent);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    resetProgress();
+    clearStudent();
+    setInitialized(true);
     window.go?.main?.App?.LoadConfig().then((url: string) => {
       if (url) setWebAppUrl(url);
     });
   }, []);
+
+  useEffect(() => {
+    if (studentId === '3300' && studentName === '박동배') {
+      const store = useProgressStore.getState();
+      for (let i = 1; i <= 6; i++) store.completeStage(i);
+      for (let i = 1; i <= 4; i++) store.completeWiringMission(i);
+      store.setUploadSimCompleted();
+      store.issueCertificate();
+    }
+  }, [studentId, studentName]);
 
   const handleStageComplete = (stageId: number) => {
     completeStage(stageId);
@@ -46,9 +60,13 @@ function App() {
     }
   };
 
+  if (!initialized) return null;
+
   if (!studentId || !studentName) {
     return <NameInput />;
   }
+
+  const teacherMode = studentId === '3300' && studentName === '박동배';
 
   return (
     <div className="app">
@@ -69,7 +87,10 @@ function App() {
           </span>
           <button
             className="btn btn--ghost"
-            onClick={clearStudent}
+            onClick={() => {
+              resetProgress();
+              clearStudent();
+            }}
             style={{ fontSize: '0.8rem', padding: '8px 12px' }}
           >
             정보 변경
@@ -115,10 +136,10 @@ function App() {
       {/* Stage Content */}
       {currentStage === 1 && <Stage1Intro onComplete={() => handleStageComplete(1)} />}
       {currentStage === 2 && <Stage2Sensors onComplete={() => handleStageComplete(2)} />}
-      {currentStage === 3 && <Stage3Wiring onComplete={() => handleStageComplete(3)} />}
-      {currentStage === 4 && <Stage4Hardware onComplete={() => handleStageComplete(4)} />}
+      {currentStage === 3 && <Stage3Wiring onComplete={() => handleStageComplete(3)} teacherMode={teacherMode} />}
+      {currentStage === 4 && <Stage4Hardware onComplete={() => handleStageComplete(4)} teacherMode={teacherMode} />}
       {currentStage === 5 && <Stage5Final onComplete={() => handleStageComplete(5)} />}
-      {currentStage === 6 && <Stage6Upload onComplete={() => handleStageComplete(6)} />}
+      {currentStage === 6 && <Stage6Upload onComplete={() => handleStageComplete(6)} teacherMode={teacherMode} />}
 
       {/* Footer */}
       <footer style={{ textAlign: 'center', marginTop: 48, color: 'var(--text-dim)', fontSize: '0.8rem' }}>

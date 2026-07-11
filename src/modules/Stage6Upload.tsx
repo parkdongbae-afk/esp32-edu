@@ -696,9 +696,10 @@ function SerialMonitor({ onComplete }: { onComplete: () => void }) {
 
 interface Stage6Props {
   onComplete: () => void;
+  teacherMode?: boolean;
 }
 
-export function Stage6Upload({ onComplete }: Stage6Props) {
+export function Stage6Upload({ onComplete, teacherMode }: Stage6Props) {
   const [step, setStep] = useState(0);
   const [quizPassed, setQuizPassed] = useState(false);
   const setUploadSimCompleted = useProgressStore((s) => s.setUploadSimCompleted);
@@ -721,6 +722,28 @@ export function Stage6Upload({ onComplete }: Stage6Props) {
       </p>
 
       {step < 6 && <StepIndicator current={step} total={7} labels={STEP_LABELS} />}
+
+      {teacherMode && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+          {STEP_LABELS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setStep(i)}
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 10px',
+                background: i === step ? 'var(--accent-blue)' : 'var(--bg-card)',
+                color: i === step ? '#fff' : 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                cursor: 'pointer',
+              }}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {step === 0 && <ArduinoInstall onComplete={() => setStep(1)} />}
       {step === 1 && <BoardManagerSetup onComplete={() => setStep(2)} />}

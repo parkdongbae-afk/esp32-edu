@@ -1059,9 +1059,10 @@ function ManusPrompt({ onComplete }: { onComplete: () => void }) {
 
 interface Stage4Props {
   onComplete: () => void;
+  teacherMode?: boolean;
 }
 
-export function Stage4Hardware({ onComplete }: Stage4Props) {
+export function Stage4Hardware({ onComplete, teacherMode }: Stage4Props) {
   const [step, setStep] = useState(0);
 
   return (
@@ -1074,6 +1075,28 @@ export function Stage4Hardware({ onComplete }: Stage4Props) {
       </p>
 
       <StepIndicator current={step} total={6} labels={STEP_LABELS} />
+
+      {teacherMode && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+          {STEP_LABELS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setStep(i)}
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 10px',
+                background: i === step ? 'var(--accent-blue)' : 'var(--bg-card)',
+                color: i === step ? '#fff' : 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                cursor: 'pointer',
+              }}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {step === 0 && <PhotoMatching onComplete={() => setStep(1)} />}
       {step === 1 && <BoardReference onComplete={() => setStep(2)} />}
